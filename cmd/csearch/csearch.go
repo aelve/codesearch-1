@@ -70,6 +70,10 @@ func Main() {
 		usage()
 	}
 
+	if args[0] == "" {
+		usage()
+	}
+
 	if *cpuProfile != "" {
 		f, err := os.Create(*cpuProfile)
 		if err != nil {
