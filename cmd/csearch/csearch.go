@@ -67,15 +67,11 @@ func Main() {
 	args := flag.Args()
 
 	if len(args) < 1 {
-		fmt.Print(args)
-		os.Exit(0)
-		//usage()
+		usage()
 	}
 
 	if args[0] == "" {
-		fmt.Print(args)
-		os.Exit(0)
-		//usage()
+		usage()
 	}
 
 	if *cpuProfile != "" {
@@ -112,23 +108,30 @@ func Main() {
 	ix := index.Open(index.File())
 	ix.Verbose = *verboseFlag
 	var post []uint32
+	if len(args) >= 2 {
+		if args[1] != "" {
+			filter := "(?m)" + args[1]
+			if *iFlag {
+				filter = "(?i)" + filter
+			}
+			filterRe, err := regexp.Compile(filter)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-	if args[1] != "" {
-		filter := "(?m)" + args[1]
-		if *iFlag {
-			filter = "(?i)" + filter
-		}
-		filterRe, err := regexp.Compile(filter)
-		if err != nil {
-			log.Fatal(err)
-		}
+			filterQuery := index.RegexpQuery(filterRe.Syntax)
 
-		filterQuery := index.RegexpQuery(filterRe.Syntax)
-
-		if *bruteFlag {
-			post = ix.PostingQuery(&index.Query{Op: index.QAll}, filterQuery)
+			if *bruteFlag {
+				post = ix.PostingQuery(&index.Query{Op: index.QAll}, filterQuery)
+			} else {
+				post = ix.PostingQuery(q, filterQuery)
+			}
 		} else {
-			post = ix.PostingQuery(q, filterQuery)
+			if *bruteFlag {
+				post = ix.PostingQuery(&index.Query{Op: index.QAll}, nil)
+			} else {
+				post = ix.PostingQuery(q, nil)
+			}
 		}
 	} else {
 		if *bruteFlag {
