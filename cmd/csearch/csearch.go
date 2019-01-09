@@ -68,7 +68,8 @@ func Main() {
 
 	if len(args) < 1 {
 		fmt.Print(args)
-		usage()
+		os.Exit(0)
+		//usage()
 	}
 
 	if args[0] == "" {
