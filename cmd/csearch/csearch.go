@@ -96,16 +96,7 @@ func Main() {
 			log.Fatal(err)
 		}
 	}
-	filter := "(?m)" + args[1]
-	if *iFlag {
-		filter = "(?i)" + filter
-	}
-	filterRe, err := regexp.Compile(filter)
-	if err != nil {
-		log.Fatal(err)
-	}
 	q := index.RegexpQuery(re.Syntax)
-	filterQuery := index.RegexpQuery(filterRe.Syntax)
 	if *verboseFlag {
 		log.Printf("query: %s\n", q)
 	}
@@ -113,11 +104,32 @@ func Main() {
 	ix := index.Open(index.File())
 	ix.Verbose = *verboseFlag
 	var post []uint32
-	if *bruteFlag {
-		post = ix.PostingQuery(&index.Query{Op: index.QAll}, filterQuery)
+
+	if args[1] != "" {
+		filter := "(?m)" + args[1]
+		if *iFlag {
+			filter = "(?i)" + filter
+		}
+		filterRe, err := regexp.Compile(filter)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		filterQuery := index.RegexpQuery(filterRe.Syntax)
+
+		if *bruteFlag {
+			post = ix.PostingQuery(&index.Query{Op: index.QAll}, filterQuery)
+		} else {
+			post = ix.PostingQuery(q, filterQuery)
+		}
 	} else {
-		post = ix.PostingQuery(q, filterQuery)
+		if *bruteFlag {
+			post = ix.PostingQuery(&index.Query{Op: index.QAll}, nil)
+		} else {
+			post = ix.PostingQuery(q, nil)
+		}
 	}
+
 	if *verboseFlag {
 		log.Printf("post query identified %d possible files\n", len(post))
 	}
