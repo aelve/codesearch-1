@@ -67,6 +67,7 @@ func Main() {
 	args := flag.Args()
 
 	if len(args) < 1 {
+		fmt.Print(args)
 		usage()
 	}
 
