@@ -73,7 +73,9 @@ func Main() {
 	}
 
 	if args[0] == "" {
-		usage()
+		fmt.Print(args)
+		os.Exit(0)
+		//usage()
 	}
 
 	if *cpuProfile != "" {
