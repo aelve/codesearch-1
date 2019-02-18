@@ -7,13 +7,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/google/codesearch/index"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime/pprof"
 	"sort"
-
-	"github.com/google/codesearch/index"
+	"strings"
 )
 
 var usageMessage = `usage: cindex [-list] [-reset] [path...]
@@ -63,7 +64,15 @@ var (
 func main() {
 	flag.Usage = usage
 	flag.Parse()
-	args := flag.Args()
+
+	pathToFile := flag.Args()
+	bytes, err := ioutil.ReadFile(pathToFile[0])
+
+	if err != nil {
+		panic(err)
+	}
+
+	args := strings.Split(string(bytes), "\n")
 
 	if *listFlag {
 		ix := index.Open(index.File())
@@ -87,6 +96,7 @@ func main() {
 		os.Remove(index.File())
 		return
 	}
+
 	if len(args) == 0 {
 		ix := index.Open(index.File())
 		for _, arg := range ix.Paths() {
