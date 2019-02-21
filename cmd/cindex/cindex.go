@@ -72,6 +72,8 @@ func main() {
 		panic(err)
 	}
 
+	bytes = bytes[:len(bytes)-1]
+
 	args := strings.Split(string(bytes), "\n")
 
 	if *listFlag {
