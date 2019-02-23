@@ -7,7 +7,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/google/codesearch/index"
+	"github.com/aelve/codesearch-engine/index"
 	"io/ioutil"
 	"log"
 	"os"
