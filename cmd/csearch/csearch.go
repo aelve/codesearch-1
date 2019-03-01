@@ -7,12 +7,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/aelve/codesearch-engine/index"
+	"github.com/aelve/codesearch-engine/regexp"
 	"log"
 	"os"
 	"runtime/pprof"
-
-	"github.com/aelve/codesearch-engine/index"
-	"github.com/aelve/codesearch-engine/regexp"
 )
 
 var usageMessage = `usage: csearch [-c] [-f fileregexp] [-h] [-i] [-l] [-n] regexp [filter for regex]
@@ -108,37 +107,11 @@ func Main() {
 	ix := index.Open(index.File())
 	ix.Verbose = *verboseFlag
 	var post []uint32
-	if len(args) >= 2 {
-		if args[1] != "" {
-			filter := "(?m)" + args[1]
-			if *iFlag {
-				filter = "(?i)" + filter
-			}
-			filterRe, err := regexp.Compile(filter)
-			if err != nil {
-				log.Fatal(err)
-			}
 
-			filterQuery := index.RegexpQuery(filterRe.Syntax)
-
-			if *bruteFlag {
-				post = ix.PostingQuery(&index.Query{Op: index.QAll}, filterQuery)
-			} else {
-				post = ix.PostingQuery(q, filterQuery)
-			}
-		} else {
-			if *bruteFlag {
-				post = ix.PostingQuery(&index.Query{Op: index.QAll}, nil)
-			} else {
-				post = ix.PostingQuery(q, nil)
-			}
-		}
+	if *bruteFlag {
+		post = ix.PostingQuery(&index.Query{Op: index.QAll})
 	} else {
-		if *bruteFlag {
-			post = ix.PostingQuery(&index.Query{Op: index.QAll}, nil)
-		} else {
-			post = ix.PostingQuery(q, nil)
-		}
+		post = ix.PostingQuery(q)
 	}
 
 	if *verboseFlag {
@@ -147,7 +120,6 @@ func Main() {
 
 	if fre != nil {
 		fnames := make([]uint32, 0, len(post))
-
 		for _, fileid := range post {
 			name := ix.Name(fileid)
 			if fre.MatchString(name, true, true) < 0 {
@@ -162,11 +134,29 @@ func Main() {
 		post = fnames
 	}
 
-	for _, fileid := range post {
-		name := ix.Name(fileid)
-		g.File(name)
-	}
+	if len(args) > 1 && args[1] != "" {
+		filter := "(?m)" + args[1]
 
+		if *iFlag {
+			filter = "(?i)" + filter
+		}
+		filterRe, err := regexp.Compile(filter)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, fileid := range post {
+			name := ix.Name(fileid)
+			g.File(name, filterRe)
+		}
+
+	} else {
+		for _, fileid := range post {
+			name := ix.Name(fileid)
+			g.File(name, nil)
+		}
+	}
 	matches = g.Match
 }
 
