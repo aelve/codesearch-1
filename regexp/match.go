@@ -429,14 +429,15 @@ func (g *Grep) Reader(r io.Reader, name string, filter *Regexp) {
 				endText = true
 			}
 			chunkStart := 0
+			m2 := filter.Match(buf[chunkStart:end], beginText, endText) + chunkStart
+			if m2 < chunkStart {
+				break
+			}
+
 			for chunkStart < end {
 				m1 := g.Regexp.Match(buf[chunkStart:end], beginText, endText) + chunkStart
-				m2 := filter.Match(buf[chunkStart:end], beginText, endText) + chunkStart
 				beginText = false
 				if m1 < chunkStart {
-					break
-				}
-				if m2 < chunkStart {
 					break
 				}
 
