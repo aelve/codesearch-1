@@ -10,7 +10,3 @@ To install:
 	go get github.com/aelve/codesearch-engine/cmd/...
 
 Use "go get -u" to update an existing installation.
-
-Russ Cox
-rsc@swtch.com
-June 2015
