@@ -211,7 +211,7 @@ func TestGrep(t *testing.T) {
 		var out, errb bytes.Buffer
 		g.Stdout = &out
 		g.Stderr = &errb
-		g.Reader(strings.NewReader(tt.s), "input")
+		g.Reader(strings.NewReader(tt.s), "input", nil)
 		if out.String() != tt.out || errb.String() != tt.err {
 			t.Errorf("#%d: grep(%#q, %q) = %q, %q, want %q, %q", i, tt.re, tt.s, out.String(), errb.String(), tt.out, tt.err)
 		}
