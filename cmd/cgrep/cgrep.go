@@ -65,7 +65,7 @@ func main() {
 	}
 	g.Regexp = re
 	if len(args) == 1 {
-		g.Reader(os.Stdin, "<standard input>", nil)
+		g.Reader(os.Stdin, "<standard input>")
 	} else {
 		for _, arg := range args[1:] {
 			g.File(arg, nil)
